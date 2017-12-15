@@ -85,23 +85,21 @@ int main() {
             currentStage++;
 
             lineCount = 0;
-        } else if (lineCount == 4 && currentStage == 3) {
+        } else if (lineCount == 5 && currentStage == 3) {
 
             clog << "Stage 3 Finished" << endl;
-            
+
             // Add a little interval
 
-            stopLeft();
-            stopRight();
+            shouldIdle++;
 
-            return 0;
+            currentStage++;
         }
 
         watch++;
         controlLeft(1, speed);
         controlRight(1, speed);
 
-        //i == 2 &&
         if (shouldIdle == 0) {
             if (should_turn_left > 0) {
                 clog << "turn left" << endl;
@@ -125,24 +123,48 @@ int main() {
         } else if (shouldIdle > 0) {
             shouldIdle++;
 
-            if (shouldIdle == 10) {
-                turnTo(-32);
+            // 3.95V: interval1 : 20
+            //        interval2 : 77
+            //        interval3 : 20
+
+            // 4.08V: interval1 : 25
+            //        interval2 : 73
+            //        interval3 : 20
+
+            int interval1 = 25;
+
+            if (currentStage == 2) {
+                interval1 += 5;
             }
 
-            if (shouldIdle == 70) {
+            // delay to turn left first corner
+            if (shouldIdle == interval1) {
+                if (currentStage == 4) {
+                    stopLeft();
+                    stopRight();
+
+                    return 0;
+                } else {
+                    turnTo(-32);
+                }
+            }
+
+            int interval2 = interval1 + 73;
+
+            // how long to turn left
+            if (shouldIdle == interval2) {
                 turnTo(0);
 
                 clog << "Recover!!!!!!!!!!!" << endl;
             }
 
-
-            int interval = 128;
-
-            if (currentStage == 2) {
-                interval += 20;
+            // delay to turn left second corner
+            int interval3 = interval2 + 20;
+            if (currentStage == 3) {
+                interval3 += 5;
             }
 
-            if (shouldIdle == interval) {
+            if (shouldIdle == interval3) {
                 shouldIdle = 0;
 
                 lineCount = 0;
@@ -169,8 +191,6 @@ int main() {
         imshow(CANNY_WINDOW_NAME, contours);
 #endif
 
-//    waitKey();
-//    return 0;
         vector<Vec4i> lines;
         HoughLinesP(contours, lines, 1, PI / 180, HOUGH_THRESHOLD, 20, 5);
         Mat result(imgROI.size(), CV_8U, Scalar(255));
@@ -202,7 +222,7 @@ int main() {
             //and atan(0.09) equals about 5 degrees.
         }
 
-        if (flag == 0 && isVisible == 1 && watch > 50) {
+        if (flag == 0 && isVisible == 1 && watch > 45) {
             clog << "count++ " << lineCount << endl;
             lineCount++;
             isVisible = 0;
