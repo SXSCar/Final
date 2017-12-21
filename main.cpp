@@ -20,12 +20,12 @@ const string CAM_PATH = "/dev/video0";
 const string MAIN_WINDOW_NAME = "Processed Image";
 const string CANNY_WINDOW_NAME = "Canny";
 
-const int CANNY_LOWER_BOUND = 75;
-const int CANNY_UPPER_BOUND = 250;
-const int HOUGH_THRESHOLD = 40;
+const int CANNY_LOWER_BOUND = 50;
+const int CANNY_UPPER_BOUND = 150;
+const int HOUGH_THRESHOLD   = 40;
 int lineCount = 0;
 int isVisible = 0;
-int watch = 0;
+int watch = 41;
 int shouldIdle = 0;
 int currentStage = 1;
 int speed = 5;
@@ -76,7 +76,7 @@ int main() {
             currentStage++;
 
             lineCount = 0;
-        } else if (lineCount == 8 && currentStage == 2) {
+        } else if (lineCount == 9 && currentStage == 2) {
 
             clog << "Stage 2 Finished" << endl;
 
@@ -88,8 +88,6 @@ int main() {
         } else if (lineCount == 5 && currentStage == 3) {
 
             clog << "Stage 3 Finished" << endl;
-
-            // Add a little interval
 
             shouldIdle++;
 
@@ -117,7 +115,7 @@ int main() {
 
                 turnWatch = 0;
 
-                turnTo(20);
+                turnTo(10);
             }
             i = 0;
         } else if (shouldIdle > 0) {
@@ -131,7 +129,7 @@ int main() {
             //        interval2 : 73
             //        interval3 : 20
 
-            int interval1 = 25;
+            int interval1 = 33;
 
             if (currentStage == 2) {
                 interval1 += 5;
@@ -149,7 +147,7 @@ int main() {
                 }
             }
 
-            int interval2 = interval1 + 73;
+            int interval2 = interval1 + 58;
 
             // how long to turn left
             if (shouldIdle == interval2) {
@@ -159,10 +157,7 @@ int main() {
             }
 
             // delay to turn left second corner
-            int interval3 = interval2 + 20;
-            if (currentStage == 3) {
-                interval3 += 5;
-            }
+            int interval3 = interval2;
 
             if (shouldIdle == interval3) {
                 shouldIdle = 0;
@@ -186,13 +181,12 @@ int main() {
         //blur(imgROI,imgROI,Size(30,30));
         Canny(imgROI, contours, CANNY_LOWER_BOUND, CANNY_UPPER_BOUND);
 
-
 #ifdef _DEBUG
         imshow(CANNY_WINDOW_NAME, contours);
 #endif
 
         vector<Vec4i> lines;
-        HoughLinesP(contours, lines, 1, PI / 180, HOUGH_THRESHOLD, 20, 5);
+        HoughLinesP(contours, lines, 1, PI / 180, HOUGH_THRESHOLD, 10, 5);
         Mat result(imgROI.size(), CV_8U, Scalar(255));
         imgROI.copyTo(result);
         clog << lines.size() << endl;
@@ -204,16 +198,16 @@ int main() {
             line(result, Point((*it)[0], (*it)[1]), Point((*it)[2], (*it)[3]), Scalar(color, color, 255), 20, CV_AA);
             float slope = ((float) (*it)[3] - (*it)[1]) / ((*it)[2] - (*it)[0]);
             //clog << "slope" << slope << endl;
-            if (slope >= -0.3 && slope <= 0.3) {
+            if (slope >= -0.4 && slope <= 0.4) {
                 if (isVisible == 0) {
                     isVisible = 1;
                 }
                 flag = 1;
             }
-            if (slope <= 2 && slope >= 0.3) {
+            if (slope <= 2 && slope >= 0.4) {
                 should_turn_left++;
             }
-            if (slope >= -2 && slope <= -0.3) {
+            if (slope >= -2 && slope <= -0.4) {
                 should_turn_left--;
             }
             color += 50;
@@ -222,13 +216,12 @@ int main() {
             //and atan(0.09) equals about 5 degrees.
         }
 
-        if (flag == 0 && isVisible == 1 && watch > 45) {
+        if (flag == 0 && isVisible == 1 && watch > 40) {
             clog << "count++ " << lineCount << endl;
             lineCount++;
             isVisible = 0;
             watch = 0;
         }
-
 
 #ifdef _DEBUG
         stringstream overlayedText;
