@@ -121,18 +121,10 @@ int main() {
         } else if (shouldIdle > 0) {
             shouldIdle++;
 
-            // 3.95V: interval1 : 20
-            //        interval2 : 77
-            //        interval3 : 20
-
-            // 4.08V: interval1 : 25
-            //        interval2 : 73
-            //        interval3 : 20
-
-            int interval1 = 33;
+            int interval1 = 35;
 
             if (currentStage == 2) {
-                interval1 += 5;
+                interval1 += 20;
             }
 
             // delay to turn left first corner
@@ -147,7 +139,7 @@ int main() {
                 }
             }
 
-            int interval2 = interval1 + 58;
+            int interval2 = interval1 + 60;
 
             // how long to turn left
             if (shouldIdle == interval2) {
